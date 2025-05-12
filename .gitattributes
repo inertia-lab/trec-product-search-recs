@@ -1,0 +1,6 @@
+*.sh text eol=lf
+*.bat text eol=crlf
+# SCM syntax highlighting
+pixi.lock linguist-language=YAML linguist-generated=true
+dvc.lock linguist-language=YAML linguist-generated=true
+uv.lock linguist-language=TOML linguist-generated=true

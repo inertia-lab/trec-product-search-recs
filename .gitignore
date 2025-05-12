@@ -1,0 +1,41 @@
+# logging and outputs, profiles, etc.
+*.log
+*.out
+*.prof
+*.lprof
+perf.data*
+
+# common temp files
+*.wal
+*.wal-log
+*.tmp
+
+# python outputs and caches
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+/.quarto/
+*.quarto_ipynb
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.o
+*.obj
+*.a
+*.lib
+
+# software environments and outputs
+/.venv/
+/.pixi/
+/build/
+/dist/
+/_site/
+*.egg-info
+
+# misc scratch files
+*.DS_Store
+.*.swp
+Thumbs.db
+*~
