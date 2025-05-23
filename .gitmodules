@@ -1,0 +1,3 @@
+[submodule "recommend-task-2025/esci-data"]
+	path = recommend-task-2025/esci-data
+	url = https://github.com/amazon-science/esci-data.git
