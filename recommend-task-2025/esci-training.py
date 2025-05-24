@@ -22,9 +22,14 @@ def main(options):
     level = logging.DEBUG if options['--verbose'] else logging.INFO
     logging.basicConfig(level=level, stream=sys.stderr)
     with connect() as db:
+        load_reference(db)
         load_examples(db)
         summarize_examples(db)
 
+def load_reference(db: DuckDBPyConnection):
+    log.info("loading UCSD ASINSs")
+    db.execute("CREATE TABLE ucsd_asins AS SELECT asin FROM 'ucsd-asins.parquet'")
+    db.execute("CREATE INDEX uscd_asin_idx ON ucsd_asins (asin)")
 
 def load_examples(db: DuckDBPyConnection):
     log.info("loading %s", ESCI_EXAMPLES)
@@ -40,6 +45,7 @@ def summarize_examples(db: DuckDBPyConnection):
         WITH counts AS (
                 SELECT query_id, query, esci_label, COUNT(*) AS N
                 FROM esci_queries
+                SEMI JOIN ucsd_asins ON (product_id = asin)
                 WHERE product_locale = 'us'
                 GROUP BY query_id, query, esci_label
         )
