@@ -23,6 +23,8 @@ def main(options):
     logging.basicConfig(level=level, stream=sys.stderr)
     with connect() as db:
         load_examples(db)
+        summarize_examples(db)
+
 
 def load_examples(db: DuckDBPyConnection):
     log.info("loading %s", ESCI_EXAMPLES)
@@ -30,6 +32,22 @@ def load_examples(db: DuckDBPyConnection):
     db.execute("SELECT COUNT(*) FROM esci_queries")
     count, = db.fetchone()
     log.info("loaded %d example entries", count)
+
+def summarize_examples(db: DuckDBPyConnection):
+    db.execute(
+        """
+        CREATE TABLE query_stats AS
+        WITH counts AS (
+                SELECT query_id, query, esci_label, COUNT(*) AS N
+                FROM esci_queries
+                WHERE product_locale = 'us'
+                GROUP BY query_id, query, esci_label
+        )
+        PIVOT counts
+        ON esci_label
+        USING SUM(N)
+        """)
+    print(db.table('query_stats').df())
 
 
 if __name__ == '__main__':
