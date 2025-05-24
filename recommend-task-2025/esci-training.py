@@ -2,20 +2,36 @@
 Generate training and validation data from ESCI data.
 
 Usage:
-    esci-training.py
+    esci-training.py [-v]
+
+Options:
+    -v, --verbose
+        Turn on verbose logging.
 """
 
+import logging
+import sys
+from docopt import docopt
 from duckdb import connect, DuckDBPyConnection
+
+log = logging.getLogger('trec-product.esci-training')
 
 ESCI_EXAMPLES = "esci-data/shopping_queries_dataset/shopping_queries_dataset_examples.parquet"
 
-def main():
+def main(options):
+    level = logging.DEBUG if options['--verbose'] else logging.INFO
+    logging.basicConfig(level=level, stream=sys.stderr)
     with connect() as db:
         load_examples(db)
 
 def load_examples(db: DuckDBPyConnection):
+    log.info("loading %s", ESCI_EXAMPLES)
     db.execute(f"CREATE TABLE esci_queries AS select * from '{ESCI_EXAMPLES}'")
+    db.execute("SELECT COUNT(*) FROM esci_queries")
+    count, = db.fetchone()
+    log.info("loaded %d example entries", count)
 
 
 if __name__ == '__main__':
-    main()
+    opts = docopt(__doc__ or "")
+    main(opts)
