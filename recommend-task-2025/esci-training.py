@@ -43,11 +43,11 @@ def summarize_examples(db: DuckDBPyConnection):
         """
         CREATE TABLE query_stats AS
         WITH counts AS (
-                SELECT query_id, query, esci_label, COUNT(*) AS N
-                FROM esci_queries
-                SEMI JOIN ucsd_asins ON (product_id = asin)
-                WHERE product_locale = 'us'
-                GROUP BY query_id, query, esci_label
+            SELECT query_id, query, esci_label, COUNT(*) AS N
+            FROM esci_queries
+            SEMI JOIN ucsd_asins ON (product_id = asin)
+            WHERE product_locale = 'us'
+            GROUP BY query_id, query, esci_label
         )
         PIVOT counts
         ON esci_label
