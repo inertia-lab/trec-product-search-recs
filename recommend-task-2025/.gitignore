@@ -1,2 +1,4 @@
 *.parquet
 ucsd-2023
+*.qrels.gz
+*.queries.gz
