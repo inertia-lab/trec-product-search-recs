@@ -142,10 +142,21 @@ def write_qrels(db: DuckDBPyConnection, out_fn: str):
     with xopen(out_fn, "wt") as outf:
         db.execute(
             """
-            SELECT q_id || rel_type AS qno, 0 AS iter, tgt_asin, 1 AS rel
+            SELECT q_id || 'C' AS qno, 0 AS iter, tgt_asin, IF(rel_type = 'C', 1, 0) AS rel
             FROM train_items
             JOIN item_relationships USING (ref_asin)
-            WHERE rel_type IN ('C', 'S')
+            ORDER BY q_id, rel_type, tgt_asin
+            """
+        )
+
+        for row in db.fetchall():
+            print("\t".join(str(c) for c in row), file=outf)
+
+        db.execute(
+            """
+            SELECT q_id || 'S' AS qno, 0 AS iter, tgt_asin, IF(rel_type = 'S', 1, 0) AS rel
+            FROM train_items
+            JOIN item_relationships USING (ref_asin)
             ORDER BY q_id, rel_type, tgt_asin
             """
         )
