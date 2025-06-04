@@ -2,11 +2,13 @@
 Generate training and validation data from ESCI data.
 
 Usage:
-    esci-training.py [-v] [-Q FILE] [-R FILE]
+    esci-training.py [-v] [-C CORPUS] [-Q FILE] [-R FILE]
 
 Options:
     -v, --verbose
         Turn on verbose logging.
+    -C CORPUS, --corpus=CORPUS
+        Path to the corpus file to limit query data.
     -Q FILE, --query-output=FILE
         Write queries to FILE [default: train-esci.queries.gz]
     -R FILE, --qrel-output=FILE
@@ -31,7 +33,7 @@ def main(options):
     level = logging.DEBUG if options["--verbose"] else logging.INFO
     logging.basicConfig(level=level, stream=sys.stderr)
     with connect() as db:
-        load_reference(db)
+        load_reference(db, options.get("--corpus"))
         load_examples(db)
         summarize_examples(db)
         find_item_relationships(db)
@@ -39,10 +41,16 @@ def main(options):
         write_qrels(db, options["--qrel-output"])
 
 
-def load_reference(db: DuckDBPyConnection):
-    log.info("loading UCSD ASINSs")
-    db.execute("CREATE TABLE ucsd_asins AS SELECT asin FROM 'ucsd-asins.parquet'")
-    db.execute("CREATE INDEX uscd_asin_idx ON ucsd_asins (asin)")
+def load_reference(db: DuckDBPyConnection, corpus_path: str | None):
+    if corpus_path is not None:
+        log.info("reading corpus from %s", corpus_path)
+        db.execute(
+            f"CREATE TABLE valid_asins AS SELECT id AS asin FROM '{corpus_path}'"
+        )
+    else:
+        log.info("loading UCSD ASINSs")
+        db.execute("CREATE TABLE valid_asins AS SELECT asin FROM 'ucsd-asins.parquet'")
+    db.execute("CREATE INDEX valid_asin_idx ON valid_asins (asin)")
 
 
 def load_examples(db: DuckDBPyConnection):
@@ -60,7 +68,7 @@ def summarize_examples(db: DuckDBPyConnection):
         WITH counts AS (
             SELECT query_id, query, esci_label, COUNT(*) AS N
             FROM esci_queries
-            SEMI JOIN ucsd_asins ON (product_id = asin)
+            SEMI JOIN valid_asins ON (product_id = asin)
             WHERE product_locale = 'us'
             GROUP BY query_id, query, esci_label
         )
@@ -88,7 +96,7 @@ def find_item_relationships(db: DuckDBPyConnection):
         WITH usable_queries AS (
             SELECT query_id, product_id, esci_label
             FROM esci_queries
-            SEMI JOIN ucsd_asins ON (product_id = asin)
+            SEMI JOIN valid_asins ON (product_id = asin)
             WHERE product_locale = 'us'
         )
         INSERT INTO item_relationships (ref_asin, tgt_asin, rel_type)
@@ -133,8 +141,11 @@ def write_items(db: DuckDBPyConnection, out_fn: str):
             """
         )
 
+        n = 0
         for row in db.fetchall():
             print("\t".join(str(c) for c in row), file=outf)
+            n += 1
+        log.info("Wrote %d queries", n)
 
 
 def write_qrels(db: DuckDBPyConnection, out_fn: str):
