@@ -1,4 +1,6 @@
 *.parquet
 ucsd-2023
+amazon-m2
 *.qrels.gz
 *.queries.gz
+*.duckdb
