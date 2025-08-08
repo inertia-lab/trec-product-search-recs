@@ -49,7 +49,9 @@ def load_reference(db: DuckDBPyConnection, corpus_path: str | None):
         )
     else:
         log.info("loading UCSD ASINSs")
-        db.execute("CREATE TABLE valid_asins AS SELECT asin FROM 'ucsd-asins.parquet'")
+        db.execute(
+            "CREATE TABLE valid_asins AS SELECT DISTINCT asin FROM 'ucsd-asins.parquet'"
+        )
     db.execute("CREATE INDEX valid_asin_idx ON valid_asins (asin)")
 
 
