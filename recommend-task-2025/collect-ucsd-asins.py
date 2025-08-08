@@ -35,8 +35,10 @@ def collect_asins(db: DuckDBPyConnection, path: str):
     db.execute(
         f"""
         COPY (
-            SELECT DISTINCT parent_asin AS asin
-            FROM '{path}/meta_*.jsonl.zst'
+            SELECT DISTINCT
+                regexp_extract(filename, 'meta_(.*)\\.jsonl\\.zst', 1) AS category,
+                parent_asin AS asin
+            FROM read_json('{path}/meta_*.jsonl.zst', filename=true)
             ORDER BY asin
         ) TO 'ucsd-asins.parquet' (COMPRESSION ZSTD)
         """
