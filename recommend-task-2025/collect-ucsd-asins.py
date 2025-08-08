@@ -38,8 +38,6 @@ def collect_asins(db: DuckDBPyConnection, path: str):
             SELECT DISTINCT
                 regexp_extract(filename, 'meta_(.*)\\.jsonl\\.zst', 1) AS category,
                 parent_asin AS asin,
-                len(description) AS n_desc_entries,
-                len(description[1]) AS desc_len,
                 rating_number AS rating_count,
             FROM read_json('{path}/meta_*.jsonl.zst', filename=true)
             ORDER BY asin
