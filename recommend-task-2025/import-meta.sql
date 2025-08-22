@@ -2,6 +2,7 @@ CREATE OR REPLACE SEQUENCE product_number;
 CREATE OR REPLACE TABLE products (
     prod_id INTEGER PRIMARY KEY DEFAULT nextval('product_number'),
     asin VARCHAR NOT NULL UNIQUE,
+    title VARCHAR,
     category VARCHAR NOT NULL,
     n_desc_entries INTEGER,
     desc_len INTEGER,
@@ -9,10 +10,11 @@ CREATE OR REPLACE TABLE products (
 );
 
 .print Loading UCSD products;
-INSERT INTO products (category, asin, n_desc_entries, desc_len, rating_count)
+INSERT INTO products (category, asin, title, n_desc_entries, desc_len, rating_count)
 SELECT DISTINCT
     regexp_extract(filename, 'meta_(.*)\.jsonl\.zst', 1) AS category,
     parent_asin AS asin,
+    title,
     len(description) AS n_desc_entries,
     len(description[1]) AS desc_len,
     rating_number AS rating_count,
