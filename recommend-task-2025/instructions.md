@@ -38,27 +38,34 @@ third, longer list for each query for pooling.
 
 ## Training and Preparatory Data
 
-We are providing the following data to track participants (coming soon):
+[repo]: https://huggingface.co/datasets/trec-product-search/product-recommendation-2025/
+[README]: https://huggingface.co/datasets/trec-product-search/product-recommendation-2025/blob/main/eval/README.md
 
-* Product metadata and user purchase session data from the [Amazon M2][M2] data
-  set.
-* Annotated search results from the [Amazon ESCI][ESCI] data set.
-* Annotated training and validation data synthesized from the annotations in the
-  [Amazon ESCI][ESCI] data set, along with the synthesis code for reference and
-  synthesis of additional training data. ESCI is a search data set; the
-  recommendation data is generated from its annotations by selecting the Exact
-  product as the reference item, and using the Substitute and Complementary
-  annotations to assess relationships to the Exact item instead of to the query.
-  One of our hopeful meta-outcomes for this task is a better understanding of
-  how that data compares to annotations generated specifically for the
-  related-product recommendation task.
-* Documentation for linking the provided data with the [Amazon reviews and
-  product data](https://amazon-reviews-2023.github.io/) provided by Julian
-  Mcauley’s research group at UCSD (for reference and supplementary training
-  data if desired, not a formal part of the task).
+We have provided the following data to track participants, available [on
+HuggingFace][repo]:
 
-The search corpus is formed from combining the M2 and ESCI product training data sets,
-and filtering as follows:
+* A product corpus curated from [Amazon M2][M2] and [Amazon ESCI][ESCI],
+  filtered to only include items also available in the Mcauley Lab's Amazon
+  reviews data.
+* Training / validation queries and qrels for the Substitute and Complementary
+  subtasks, synthesized from Amazon ESCI (see [README][] for details).
+
+For your final submissions, use the **eval** directory.
+
+All data is recorded with ASINs, so your model can be trained by cross-linking it with other public datasets:
+
+* [Amazon M2][M2] (user purchase sessions)
+* [Amazon ESCI][ESCI] (annotated search results)
+* [Amazon reviews and product data][UCSD]
+
+You are **not** limited to the product data in the corpus — feel free to enrich
+with other sources, such as other data available in the original ESCI or M2 data
+sets, or the UCSD Ratings & Reviews.
+
+Our repository also contains copies of the relevant pieces of the original M2
+and ESCI data sets, pursuant to their Apache licenses. The search corpus is
+formed from combining the M2 and ESCI product training data sets, and filtering
+as follows:
 
 * All items must also appear on the UCSD review data set (for more detailed
   descriptions for the assessors).
@@ -67,15 +74,9 @@ and filtering as follows:
 * Only items in the *Electronics*, *Home and Garden* and *Sports and Outdoors*
   categories.
 
-
-Amazon product identifiers are consistent across both data sets.
-
-You are **not** limited to the product data in the corpus — feel free to enrich
-with other sources, such as other data available in the original ESCI or M2 data
-sets, or the UCSD Ratings & Reviews.
-
 [ESCI]: https://amazonkddcup.github.io/
 [M2]: https://kddcup23.github.io/
+[UCSD]: https://amazon-reviews-2023.github.io/
 
 ## Task Definition and Query Data
 
@@ -84,15 +85,20 @@ recommendations. Each request contains a single Amazon product ID (the
 *reference item*). For each reference item, the system should produce (and teams
 submit) **three** output lists:
 
-1. A ranked list of 100 related items, with an annotation as to whether they are complementary or substitute. This will be used to generate deeper pools for evaluation.
+1. A ranked list of 100 related items, with an annotation as to whether they are
+   complementary or substitute. This will be used to generate deeper pools for
+   evaluation.
 2. A list of 10 **Top Complementary** items.
 3. A list of 10 **Top Substitute** items.
 
-Participant solutions are not restricted to the training data we provide — it is acceptable to enrich the track data with additional data sources such as the Amazon Review datasets for training or model operation.
+Participant solutions are not restricted to the training data we provide — it is
+acceptable to enrich the track data with additional data sources such as the
+Amazon Review datasets for training or model operation.
 
 ### Query Format
 
-The query data will be in a CSV file with 3 columns: query ID, product ID (ASIN), and the product title.
+The query data will be in a CSV file with 3 columns: query ID, product ID
+(ASIN), and the product title.
 
 ### Run Format
 
@@ -118,20 +124,27 @@ Recommended items from submitted runs will be pooled and assessed by NIST assess
 
 ## Evaluation Metrics
 
-The primary evaluation metric will be **NDCG** computed separately for each top-substitute and top-complement recommendation list. This will be aggregated in the following ways to produce submission-level metrics:
+The primary evaluation metric will be **NDCG** computed separately for each
+top-substitute and top-complement recommendation list. This will be aggregated
+in the following ways to produce submission-level metrics:
 
-* Separate **Complement NDCG** and **Substitute NDCG**, using the relevance grades above (1, 2, and 3\) as the gain.
-* **Average NDCG**, averaging the NDCG across all runs. This is the top-line metric for ordering systems in the final report.
+* Separate **Complement NDCG** and **Substitute NDCG**, using the relevance
+  grades above (1, 2, and 3\) as the gain.
+* **Average NDCG**, averaging the NDCG across all runs. This is the top-line
+  metric for ordering systems in the final report.
 
 We will compute supplementary metrics including:
 
-* **Pool NDCG** of the longer related-product run, where the gain for an incorrectly-classified item is 50% of the gain it would have if it were correctly classified.
+* **Pool NDCG** of the longer related-product run, where the gain for an
+  incorrectly-classified item is 50% of the gain it would have if it were
+  correctly classified.
 * Agreement of annotations in the long (pooling) run.
-* **Diversity** of the substitute and complementary product lists, computed over fine-grained product category data from the 2023 Amazon Reviews data set.
+* **Diversity** of the substitute and complementary product lists, computed over
+  fine-grained product category data from the 2023 Amazon Reviews data set.
 
-## **Timeline**
+## Timeline
 
-* Task Data Release: May 15, 2025
+* Task Data Release: **Now available**
 * Development Period: Summer 2025
-* Test Query Release: Late August 2025
-* Submission Deadline: Early Sept. 2025
+* Test Query Release: **Aug. 25, 2025**
+* Submission Deadline: **Sep. 4, 2025**
