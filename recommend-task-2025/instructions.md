@@ -107,6 +107,10 @@ Submitted runs should be in the 6-column TREC runs format (TSV with columns
 input QIDs.  Specifically, for input query 3, the outputs should be recorded as
 qids 3R, 3C, and 3S.
 
+For the **100-item Pooled runs**, since standard TREC analysis ignores the
+Iteration field (field 2), use it to label items: emit C for complement and S
+for substitute.
+
 ## Annotation and Relevance
 
 Recommended items from submitted runs will be pooled and assessed by NIST assessors. Each item will be labeled with one of 4 categories (2 of have graded labels):
