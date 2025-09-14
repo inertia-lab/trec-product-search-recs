@@ -11,14 +11,17 @@ Options:
         The exported corpus file [default: product-corpus.json.zst]
 """
 
+# pyright: basic
 import logging
 import sys
+import time
 from csv import DictReader
 from pathlib import Path
 from typing import TextIO
 
 from docopt import docopt
 from pydantic import BaseModel, JsonValue
+from tqdm import tqdm
 from xopen import xopen
 
 log = logging.getLogger("trec-product.prep-corpus-assess")
@@ -26,6 +29,7 @@ log = logging.getLogger("trec-product.prep-corpus-assess")
 
 OUT_DIR = Path("assessment-corpus")
 CATS = ["Electronics", "Home_and_Kitchen", "Sports_and_Outdoors"]
+NOW = time.time()
 
 
 class CorpusItem(BaseModel):
@@ -58,6 +62,7 @@ def main(options):
 
     corpus = load_corpus()
     meta = load_products(corpus)
+
     write_queries(corpus, meta)
     write_items(corpus, meta)
 
@@ -74,7 +79,7 @@ def load_corpus() -> dict[str, CorpusItem]:
     return corpus
 
 
-def load_products(corpus: dict[str, ProductMeta]) -> dict[str, ProductMeta]:
+def load_products(corpus: dict[str, CorpusItem]) -> dict[str, ProductMeta]:
     ucsd_dir = Path("ucsd-2023")
     products = {}
     for cat in CATS:
@@ -83,7 +88,8 @@ def load_products(corpus: dict[str, ProductMeta]) -> dict[str, ProductMeta]:
         with xopen(cpath, "rt") as mf:
             for line in mf:
                 prod = ProductMeta.model_validate_json(line)
-                products[prod.parent_asin] = prod
+                if prod.parent_asin in corpus:
+                    products[prod.parent_asin] = prod
 
     return products
 
@@ -98,7 +104,8 @@ def write_queries(corpus: dict[str, CorpusItem], products: dict[str, ProductMeta
             for line in DictReader(xqf, delimiter="\t")
         ]
 
-    for qid, qprod in queries:
+    log.info("writing %d query pages", len(queries))
+    for qid, qprod in tqdm(queries, desc="queries"):
         meta = products[qprod]
         with open(q_dir / f"{qid}.md", "wt") as qf:
             print(f"# Query {qid}", file=qf)
@@ -110,7 +117,8 @@ def write_items(corpus: dict[str, CorpusItem], products: dict[str, ProductMeta])
     i_dir = OUT_DIR / "items"
     i_dir.mkdir(exist_ok=True, parents=True)
 
-    for pid, prod in products.items():
+    log.info("writing %d products", len(products))
+    for pid, prod in tqdm(products.items(), desc="products"):
         with open(i_dir / f"{pid}.md", "wt") as pf:
             print("# Product {pid}\n", file=pf)
             write_product(prod, pf)

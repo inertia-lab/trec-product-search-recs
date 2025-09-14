@@ -17,6 +17,7 @@ dependencies = [
   "pydantic>=2.11.9",
   "seaborn>=0.13.2",
   "toml>=0.10.2",
+  "tqdm>=4.67.1",
   "visidata>=3.2",
   "xopen>=2.0.2",
   "zstandard>=0.24.0",
