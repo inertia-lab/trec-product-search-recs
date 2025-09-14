@@ -5,3 +5,4 @@ amazon-m2
 *.qrels.gz
 *.queries.gz
 *.duckdb
+/assessment-corpus/
