@@ -70,7 +70,7 @@ def main(options):
 def load_corpus() -> dict[str, CorpusItem]:
     log.info("loading product corpus")
     corpus = {}
-    with xopen("product-corpus.json.zst", "rt") as jsonl:
+    with xopen("published/eval/product-corpus.json.zst", "rt") as jsonl:
         for line in jsonl:
             item = CorpusItem.model_validate_json(line)
             corpus[item.id] = line
@@ -98,7 +98,9 @@ def write_queries(corpus: dict[str, CorpusItem], products: dict[str, ProductMeta
     q_dir = OUT_DIR / "queries"
     q_dir.mkdir(exist_ok=True, parents=True)
     log.info("reading queries")
-    with xopen("rec-queries.tsv", "rt") as xqf:
+    with xopen(
+        "published/eval/product-recommendation-2025-test-queries.tsv", "rt"
+    ) as xqf:
         queries = [
             (line["Query_id"], line["Query ASIN"])
             for line in DictReader(xqf, delimiter="\t")
