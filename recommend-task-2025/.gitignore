@@ -7,3 +7,4 @@ amazon-m2
 *.duckdb
 /assessment-corpus/
 *.qrels
+/runs/
